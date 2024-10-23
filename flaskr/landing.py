@@ -9,7 +9,27 @@ from flaskr.db import get_db
 
 bp = Blueprint('landing', __name__)
 
-@bp.route('/register', methods=('GET', 'POST'))
+@bp.route('/home')
+def home():
+    return render_template('landing/home.html')
+
+@bp.route('/about')
+def about():
+    return render_template('landing/about.html')
+
+@bp.route('/pricing')
+def pricing():
+    return render_template('landing/pricing.html')
+
+@bp.route('/privacy')
+def privacy():
+    return render_template('landing/privacy.html')
+
+@bp.route('/terms')
+def terms():
+    return render_template('landing/terms.html')
+
+@bp.route('/register', methods = ('GET', 'POST'))
 def register():
     if request.method == 'POST':
         username = request.form['username']

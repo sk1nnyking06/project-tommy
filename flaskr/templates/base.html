@@ -1,24 +1,40 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Flaskr</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<nav>
-  <h1>Flaskr</h1>
-  <ul>
-    {% if g.user %}
-      <li><span>{{ g.user['username'] }}</span>
-      <li><a href="{{ url_for('landing.logout') }}">Log Out</a>
-    {% else %}
-      <li><a href="{{ url_for('landing.register') }}">Register</a>
-      <li><a href="{{ url_for('landing.login') }}">Log In</a>
-    {% endif %}
-  </ul>
-</nav>
-<section class="content">
-  <header>
-    {% block header %}{% endblock %}
-  </header>
-  {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-  {% block content %}{% endblock %}
-</section>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Bloopp</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <h1><a href="{{ url_for('landing.home') }}">Bloopp</a></h1>
+            <ul class="left-nav">
+                <li><a href="{{ url_for('landing.about') }}">About Us</a></li>
+                <li><a href="{{ url_for('landing.pricing') }}">Pricing</a></li>
+                <li><a href="{{ url_for('landing.terms') }}">Terms</a></li>
+                <li><a href="{{ url_for('landing.privacy') }}">Privacy</a></li>
+            </ul>
+        </div>
+        <ul class="right-nav">
+            {% if g.user %}
+                <li><span>{{ g.user['username'] }}</span></li>
+                <li><a href="{{ url_for('landing.logout') }}">Log Out</a></li>
+            {% else %}
+                <li><a href="{{ url_for('landing.register') }}">Register</a></li>
+                <li><a href="{{ url_for('landing.login') }}">Log In</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    <section class="content">
+        <header>
+            {% block header %}{% endblock %}
+        </header>
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </section>
+</body>
+</html>
