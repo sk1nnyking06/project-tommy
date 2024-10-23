@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Register{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <!-- First Name and Last Name -->
+    <label for="first_name">First Name</label>
+    <input name="first_name" id="first_name" maxlength="35" required>
+
+    <label for="last_name">Last Name</label>
+    <input name="last_name" id="last_name" maxlength="35" required>
+
+    <!-- Email -->
+    <label for="email">Email</label>
+    <input type="email" name="email" id="email" required>
+
+    <!-- Password and Re-enter Password -->
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" required>
+
+    <label for="reenter_password">Re-enter Password</label>
+    <input type="password" name="reenter_password" id="reenter_password" required>
+
+    <!-- Phone Number -->
+    <label for="phone">Phone Number (Global)</label>
+    <input type="tel" name="phone" id="phone" required>
+
+    <!-- Company Name and City -->
+    <label for="company_name">Company Name</label>
+    <input name="company_name" id="company_name" required>
+
+    <label for="company_city">Company City</label>
+    <input name="company_city" id="company_city" required>
+
+    <!-- Country and State/Province -->
+    <label for="country">Country</label>
+    <input name="country" id="country" required>
+
+    <label for="state">State/Province</label>
+    <input name="state" id="state" required>
+
+    <!-- Payment Information 
+    <h3>Payment Information</h3>
+    <label for="card_number">Card Number</label>
+    <input type="text" name="card_number" id="card_number" required>
+
+    <label for="expiry_date">MM/YY</label>
+    <input type="text" name="expiry_date" id="expiry_date" placeholder="MM/YY" required>
+
+    <label for="cvc">CVC</label>
+    <input type="text" name="cvc" id="cvc" required>
+    -->
+    <input type="submit" value="Register">
+    <input type="reset" value="Reset">
+  </form>
+{% endblock %}
