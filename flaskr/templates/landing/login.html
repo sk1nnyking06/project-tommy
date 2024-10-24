@@ -6,10 +6,47 @@
 
 {% block content %}
   <form method="post">
-    <label for="email">Email</label>
-    <input name="email" id="email" required>
+    <label for="username">Username</label>
+    <input name="username" id="username" required>
     <label for="password">Password</label>
     <input type="password" name="password" id="password" required>
     <input type="submit" value="Log In">
   </form>
+  
+  <button id="forgotPasswordBtn">Forgot Password?</button>
+
+  <div id="forgotPasswordPopup" class="popup">
+    <div class="popup-content">
+      <span class="close">&times;</span>
+      <form method="post" action="{{ url_for('landing.reset_password') }}">
+        <label for="email">Enter your email to reset password:</label>
+        <input type="email" name="email" id="email" required>
+        <input type="submit" value="Send Reset Link">
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var popup = document.getElementById("forgotPasswordPopup");
+        var btn = document.getElementById("forgotPasswordBtn");
+        var span = document.getElementsByClassName("close")[0];
+
+        btn.onclick = function() {
+            popup.style.display = "block";
+        }
+
+        span.onclick = function() {
+            popup.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == popup) {
+                popup.style.display = "none";
+            }
+        }
+    });
+</script>
 {% endblock %}

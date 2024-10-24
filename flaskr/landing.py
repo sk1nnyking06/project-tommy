@@ -1,10 +1,6 @@
 import functools
-
-from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
-)
+from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from flaskr.db import get_db
 
 bp = Blueprint('landing', __name__)
@@ -119,6 +115,13 @@ def load_logged_in_user():
         g.user = get_db().execute(
             'SELECT * FROM user WHERE id = ?', (user_id,)
         ).fetchone()
+
+@bp.route('/reset_password', methods=('POST',))
+def reset_password():
+    email = request.form['email']
+    # Add logic to send the reset link to the email
+    flash(f'Reset link sent to {email}.')
+    return redirect(url_for('landing.login'))
 
 @bp.route('/logout')
 def logout():
