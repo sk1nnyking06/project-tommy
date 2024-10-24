@@ -3,7 +3,8 @@
 {% block header %}
   <h1>{% block title %}Register{% endblock %}</h1>
 {% endblock %}
-
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% endwith %}
 {% block content %}
   <form method="post">
     <!-- First Name and Last Name -->
@@ -15,32 +16,39 @@
 
     <!-- Email -->
     <label for="email">Email</label>
-    <input type="email" name="email" id="email" required>
+    <input type="email" name="email" id="email" maxlength="150" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
 
     <!-- Password and Re-enter Password -->
     <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
-
-    <label for="reenter_password">Re-enter Password</label>
-    <input type="password" name="reenter_password" id="reenter_password" required>
-
+    <input id="password" name="password"
+    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.\+\-\[\]\*~_#:?])[A-Za-z\d.\+\-\[\]\*~_#:?]{8,64}"
+    title="Password must be 8-64 characters long and include at least 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character from . + - [ ] * ~ _ # : ?"
+    required>
+    <label for="confirm_password">Reenter Password</label>
+    <input type="password" name="reenter_password" id="reenter_password" minlength="8" maxlength="64" required 
+    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[.\+\-\[\]\*~_#:?])[A-Za-z\d.\+\-\[\]\*~_#:?]{8,64}"
+    title="Password must be 8-64 characters long and include at least 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character from . + - [ ] * ~ _ # : ?"
+    required>
     <!-- Phone Number -->
     <label for="phone">Phone Number (Global)</label>
     <input type="tel" name="phone" id="phone" required>
 
     <!-- Company Name and City -->
     <label for="company_name">Company Name</label>
-    <input name="company_name" id="company_name" required>
+    <input name="company_name" id="company_name" maxlength="100" required>
 
     <label for="company_city">Company City</label>
-    <input name="company_city" id="company_city" required>
+    <input name="company_city" id="company_city" maxlength="80" required>
 
     <!-- Country and State/Province -->
     <label for="country">Country</label>
-    <input name="country" id="country" required>
+    <select name="country" id="country" required>
+        <option value="usa">United States of America</option>
+        <option value="canada">Canada</option>
+    </select>
 
     <label for="state">State/Province</label>
-    <input name="state" id="state" required>
+    <input name="state" id="state" maxlength="50" required>
 
     <!-- Payment Information 
     <h3>Payment Information</h3>
