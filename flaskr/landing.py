@@ -1,8 +1,8 @@
 import functools
-from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for)
+from flask import (Blueprint, flash, g, redirect, render_template, request, session, url_for,current_app)
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
-
+from flask_mail import Mail
 bp = Blueprint('landing', __name__)
 
 @bp.route('/home')
@@ -116,12 +116,30 @@ def load_logged_in_user():
             'SELECT * FROM user WHERE id = ?', (user_id,)
         ).fetchone()
 
+def check_email_exists(email):
+    # Example using a hypothetical database function:
+    db = get_db()
+    result = db.execute("SELECT * FROM user WHERE email = ?", (email,))
+    user = result.fetchone()  # Fetch the first row
+    return user is not None  # Check if a user row was found
+
 @bp.route('/reset_password', methods=('POST',))
 def reset_password():
     email = request.form['email']
-    # Add logic to send the reset link to the email
-    flash(f'Reset link sent to {email}.')
-    return redirect(url_for('landing.login'))
+    if check_email_exists(email):
+        # Send reset link logic here
+        # ... (implementation to send reset link)
+        flash(f'Reset link sent to {email}.')
+        mail = Mail(current_app)
+        mail.send_message(
+            subject='Password Reset',
+            recipients=[email],
+            body='Click the link to reset your password.'
+        )
+        return redirect(url_for('landing.login'))
+    else:
+        flash('Email not found. Please try again.')
+        return redirect(url_for('landing.login'))
 
 @bp.route('/logout')
 def logout():
