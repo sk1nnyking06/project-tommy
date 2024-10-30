@@ -10,5 +10,7 @@ CREATE TABLE user (
   company_name TEXT NOT NULL,
   company_city TEXT NOT NULL,
   company_country TEXT NOT NULL,
-  company_state TEXT NOT NULL
+  company_state TEXT NOT NULL,
+  confirm_login BOOLEAN NOT NULL DEFAULT false,
+  confirm_login_token TEXT NOT NULL DEFAULT ''
 );

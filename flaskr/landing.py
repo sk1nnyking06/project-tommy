@@ -3,6 +3,7 @@ from flask import (Blueprint, flash, g, redirect, render_template, request, sess
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 from flask_mail import Mail
+import hashlib
 bp = Blueprint('landing', __name__)
 
 @bp.route('/home')
@@ -99,11 +100,43 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            return redirect(url_for('index'))
+            if not user['confirm_login']:
+                error = 'Link to verify your email has been sent. Please verify your email to login.'
+                token = hashlib.sha256((str(user['id']) + '\x19^|\x8aK\xa7\xe5\xb8\xc3\xb7z2u45W').encode('utf-8')).hexdigest()
+                db.execute('UPDATE user SET confirm_login_token = ? WHERE id = ?', (token, user['id']))
+                db.commit()
+                verify_url = url_for('landing.verify', token=token, _external=True)
+                mail = Mail(current_app)
+                mail.send_message(
+                    subject='Please Verify Your Email',
+                    recipients=[email],
+                    html=f'<p>Please click the link below to verify your email:</p><p><a href="{verify_url}">Verify Email</a></p>'
+                )
+                flash('Please verify your email before logging in. A link has been sent to your email.')
+                return render_template('landing/login.html')
+            else:
+                return redirect(url_for('index'))
 
         flash(error)
 
     return render_template('landing/login.html')
+
+@bp.route('/verify')
+def verify():
+    token = request.args.get('token')
+    db = get_db()
+    user = db.execute('SELECT * FROM user WHERE confirm_login_token = ?', (token,)).fetchone()
+
+    if user is None:
+        flash('Invalid verification link.')
+        return redirect(url_for('index'))
+
+    # Update the user's confirmation status
+    db.execute('UPDATE user SET confirm_login = 1 WHERE id = ?', (user['id'],))
+    db.commit()
+
+    flash('Email verified successfully. You can now log in.')
+    return redirect(url_for('landing.login'))
 
 @bp.before_app_request
 def load_logged_in_user():
