@@ -27,6 +27,8 @@ def privacy():
 def terms():
     return render_template('landing/terms.html')
 
+#register takes in the user's information and stores it in the database
+#it also checks if the user already exists in the database
 @bp.route('/register', methods = ('GET', 'POST'))
 def register():
     if request.method == 'POST':
@@ -82,6 +84,10 @@ def register():
 
     return render_template('landing/register.html')
 
+#login takes in the user's email and password and checks if the user exists in the database
+#it also checks if the user has verified their email
+#If the user has not verified their email, a link is sent to their email to verify their email
+#If the user has verified their email, they are redirected to the index page
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
@@ -101,7 +107,9 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
+            #confirm_login is a boolean that is false until the user verifies their email
             if not user['confirm_login']:
+                #generate a token to verify the user's email that is stored in the database
                 error = 'Link to verify your email has been sent. Please verify your email to login.'
                 token = hashlib.sha256((str(user['id']) + '\x19^|\x8aK\xa7\xe5\xb8\xc3\xb7z2u45W').encode('utf-8')).hexdigest()
                 db.execute('UPDATE user SET confirm_login_token = ? WHERE id = ?', (token, user['id']))
@@ -121,7 +129,9 @@ def login():
         flash(error)
 
     return render_template('landing/login.html')
-
+#verfy checks if the token in the url is valid
+#by checking if the token exists in the database
+#then it updates the user's confirmation status in the database
 @bp.route('/verify')
 def verify():
     token = request.args.get('token')
@@ -149,7 +159,7 @@ def load_logged_in_user():
         g.user = get_db().execute(
             'SELECT * FROM user WHERE id = ?', (user_id,)
         ).fetchone()
-
+#this simply checks if the user's email exists in the database
 def check_email_exists(email):
     
     db = get_db()
@@ -157,14 +167,15 @@ def check_email_exists(email):
     user = result.fetchone()  # Fetch the first row
     return user is not None  # Check if a user row was found
 
+#reset_password sends a link to the user's email to reset their password
+#it also checks if the user's email exists in the database before sending the link
+#the link is tokenized, storing the user's email in the token so that the user can be identified
 @bp.route('/reset_password', methods=('POST',))
 def reset_password():
     email = request.form['email']
     token = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).dumps(email, salt='reset-salt')
     link = url_for('landing.reset_with_token', token=token, _external=True)
     if check_email_exists(email):
-        # Send reset link logic here
-        # ... (implementation to send reset link)
         mail = Mail(current_app)
         mail.send_message(
             subject='Password Reset',
