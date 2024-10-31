@@ -3,6 +3,7 @@ from flask import (Blueprint, flash, g, redirect, render_template, request, sess
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 from flask_mail import Mail
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 import hashlib
 bp = Blueprint('landing', __name__)
 
@@ -150,7 +151,7 @@ def load_logged_in_user():
         ).fetchone()
 
 def check_email_exists(email):
-    # Example using a hypothetical database function:
+    
     db = get_db()
     result = db.execute("SELECT * FROM user WHERE email = ?", (email,))
     user = result.fetchone()  # Fetch the first row
@@ -159,20 +160,52 @@ def check_email_exists(email):
 @bp.route('/reset_password', methods=('POST',))
 def reset_password():
     email = request.form['email']
+    token = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).dumps(email, salt='reset-salt')
+    link = url_for('landing.reset_with_token', token=token, _external=True)
     if check_email_exists(email):
         # Send reset link logic here
         # ... (implementation to send reset link)
-        flash(f'Reset link sent to {email}.')
         mail = Mail(current_app)
         mail.send_message(
             subject='Password Reset',
             recipients=[email],
-            body='Click the link to reset your password.'
+            body=f'Click the link to reset your password: {link}'
         )
+        flash('A password reset link has been sent to your email.')
         return redirect(url_for('landing.login'))
     else:
         flash('Email not found. Please try again.')
         return redirect(url_for('landing.login'))
+    
+@bp.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_with_token(token):
+    try:
+        email = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).loads(token, salt='password-reset-salt', max_age=3600)
+    except SignatureExpired:
+        flash('The reset link is invalid or has expired.', 'danger')
+        return redirect(url_for('landing.reset_password'))
+
+    if request.method == 'POST':
+        new_password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        if new_password != confirm_password:
+            flash('Passwords do not match. Please try again.')
+            return redirect(url_for('landing.reset_with_token', token=token))
+        
+        hashed_password = generate_password_hash(new_password)
+        # Update user's password in the database
+        db = get_db()
+        db.execute(
+            'UPDATE user SET password = ? WHERE email = ?',
+            (hashed_password, email)
+        )
+        db.commit()
+
+        flash('Your password has been updated.')
+        return redirect(url_for('landing.login'))
+
+    return render_template('reset_with_token.html', token=token)
 
 @bp.route('/logout')
 def logout():
