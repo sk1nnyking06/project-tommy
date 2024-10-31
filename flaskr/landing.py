@@ -180,10 +180,10 @@ def reset_password():
 @bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_with_token(token):
     try:
-        email = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).loads(token, salt='password-reset-salt', max_age=3600)
+        email = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).loads(token, salt='reset-salt', max_age=3600)
     except SignatureExpired:
         flash('The reset link is invalid or has expired.', 'danger')
-        return redirect(url_for('landing.reset_password'))
+        return redirect(url_for('landing.login'))
 
     if request.method == 'POST':
         new_password = request.form['password']
@@ -205,7 +205,7 @@ def reset_with_token(token):
         flash('Your password has been updated.')
         return redirect(url_for('landing.login'))
 
-    return render_template('reset_with_token.html', token=token)
+    return render_template('landing/reset_with_token.html', token=token)
 
 @bp.route('/logout')
 def logout():
