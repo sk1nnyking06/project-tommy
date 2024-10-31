@@ -157,14 +157,17 @@ def check_email_exists(email):
     user = result.fetchone()  # Fetch the first row
     return user is not None  # Check if a user row was found
 
+#checks if the user account exists:
+#if it DOES, will generate a unique token and URL and sends an email with the URL; displays a message that a message has been sent
+#if it DOES NOT, displays a message saying the account does not exist
 @bp.route('/reset_password', methods=('POST',))
 def reset_password():
     email = request.form['email']
-    token = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).dumps(email, salt='reset-salt')
-    link = url_for('landing.reset_with_token', token=token, _external=True)
+
     if check_email_exists(email):
-        # Send reset link logic here
-        # ... (implementation to send reset link)
+        token = URLSafeTimedSerializer(current_app.config['SECRET_KEY']).dumps(email, salt='reset-salt')
+        link = url_for('landing.reset_with_token', token=token, _external=True)
+
         mail = Mail(current_app)
         mail.send_message(
             subject='Password Reset',
@@ -177,6 +180,11 @@ def reset_password():
         flash('Email not found. Please try again.')
         return redirect(url_for('landing.login'))
     
+#verifies and load the email from the token
+#if the token is expired, shows an error message and redirects the user back to login
+#if the email is valid, requests the new password and to confirm the password and checks if they match
+#if the passwords DO NOT match, will show an error message 
+#if all fields are valid and correct, will generate the hashed password and update the user password in the database with a success message
 @bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_with_token(token):
     try:
@@ -207,6 +215,7 @@ def reset_with_token(token):
 
     return render_template('landing/reset_with_token.html', token=token)
 
+#clears the session/session data and returns the user to the home page
 @bp.route('/logout')
 def logout():
     session.clear()
